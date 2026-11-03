@@ -70,6 +70,27 @@ void setup()
     Serial.println("SD-Karte erfolgreich initialisiert.");
   }
 
+  // read partition table and mount SD card
+  if (!SD.exists("/")) {
+    Serial.println("Partitionstabelle konnte nicht gelesen werden oder SD-Karte ist leer!");
+  } else {
+    Serial.println("Partitionstabelle erfolgreich gelesen und SD-Karte gemountet.");
+  }
+  // Warte kurz, damit die serielle Ausgabe vollständig angezeigt wird
+  delay(100);
+  // list files on SD card
+  File root = SD.open("/");
+  if (root) {
+    File file = root.openNextFile();
+    while (file) {
+      Serial.print("Found file: ");
+      Serial.println(file.name());
+      file = root.openNextFile();
+    }
+  }
+
+
+
   Serial.println("Starte E-Paper...");
 
   // E-Paper Display initialisieren
