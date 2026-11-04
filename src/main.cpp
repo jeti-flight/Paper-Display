@@ -331,6 +331,7 @@ void loop()
   for (int i = 0; i < 50; i++) {
     singleLine += char(random(32, 127)); // generate random printable ASCII character
   }
+  singleLine = String(counter) + " --- " + singleLine;
   appendLine(singleLine);
   counter ++;
   // every 7 iterations write one line randomly into the buffer or display
@@ -344,6 +345,29 @@ void loop()
   display.init(115200, false); // Initialize the e-paper display for partial refresh
 
   displayLines();
+
+  // every 20 iterations list files again on the SD card
+  if (counter % 20 == 0) {
+    Serial.println("Listing files on SD card...");
+    appendLine("Liste Dateien auf der SD-Karte auf...");
+    displayLines();
+    listFiles(SD, "/");
+    for (size_t i = 0; i < fileInfoList.size(); i++) {
+      if (fileInfoList[i].isDirectory) {
+        Serial.printf("(Dir) %s\n", fileInfoList[i].pfad.c_str());
+        appendLine("(Dir) " + String(fileInfoList[i].pfad));
+      } else {
+        Serial.printf("(File) %s\n", fileInfoList[i].pfad.c_str());
+        appendLine("(File) " + String(fileInfoList[i].pfad));
+        appendLine(String("-->Size: ") + String(fileInfoList[i].groese) + " bytes");
+      }
+    }
+    if (fileInfoList.empty()) {
+      Serial.println("No files found on SD card.");
+      appendLine("Keine Dateien auf der SD-Karte gefunden.");
+    }
+    displayLines();
+  }
 
   // full refresh of the display after partial updates after 10 cycles
   if (counter % 50 == 0) { // Perform full refresh every 10 cycles
